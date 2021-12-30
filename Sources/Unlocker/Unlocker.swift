@@ -22,6 +22,9 @@ public struct Unlocker<Content>: View where Content: View {
     /// This is the completion, which will be run the percentage of the progress of the slider has passed the threshold.
     private let completion: (() -> Void)?
     
+    /// This defines if the percentage should be reset after completion has been executed
+    private let resetOnCompletion: Bool
+    
     /// Unlocker
     /// - Parameters:
     ///   - disabled: This is a flag to `prevent the slider works multiple times` during the process.
@@ -37,6 +40,7 @@ public struct Unlocker<Content>: View where Content: View {
         minPercentage: Float = 25.0,
         threshold: Float = 50.0,
         duration: Double = 0.3,
+        resetOnCompletion: Bool = true,
         @ViewBuilder content: @escaping (_ sliderWidth: CGFloat) -> Content,
         completion: (() -> Void)? = nil
     ) {
@@ -47,6 +51,7 @@ public struct Unlocker<Content>: View where Content: View {
         self.duration = duration
         self.content = content
         self.completion = completion
+        self.resetOnCompletion = resetOnCompletion
     }
     
     public var body: some View {
@@ -146,13 +151,15 @@ extension Unlocker {
             }
             
             // Reset slider
-            DispatchQueue.main.asyncAfter(deadline: .now() + duration + 0.2) {
-                withAnimation(.easeOut(duration: duration)) {
-                    percentage = minPercentage
+            if resetOnCompletion {
+                DispatchQueue.main.asyncAfter(deadline: .now() + duration + 0.2) {
+                    withAnimation(.easeOut(duration: duration)) {
+                        percentage = minPercentage
+                    }
                 }
             }
             
-        } else {
+        } else if resetOnCompletion {
             
             // Reset slider
             DispatchQueue.main.async {
