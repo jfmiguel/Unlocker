@@ -159,7 +159,7 @@ extension Unlocker {
                 }
             }
             
-        } else if resetOnCompletion {
+        } else {
             
             // Reset slider
             DispatchQueue.main.async {
