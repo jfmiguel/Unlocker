@@ -66,8 +66,6 @@ public struct Unlocker<Content>: View where Content: View {
                 content(sliderWidth)
                     .frame(width: sliderWidth)
                 
-            } //: Z
-            .contentShape(Path(CGRect(origin: .zero, size: geo.size)))
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged({ value in
@@ -77,6 +75,9 @@ public struct Unlocker<Content>: View where Content: View {
                         onEnded()
                     })
             )
+            
+            } //: Z
+            .contentShape(Path(CGRect(origin: .zero, size: geo.size)))
         } //: G
         .disabled(disabled)
         .onAppear {
