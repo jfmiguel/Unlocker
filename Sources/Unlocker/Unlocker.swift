@@ -9,8 +9,8 @@ public struct Unlocker<Content>: View where Content: View {
     /// This is the percentage of the slider.
     @Binding var percentage: Float
     
-    /// This is the minimum percentage. When you set this not zero, the slider would be filled the percentage that you set.
-    private let minPercentage: Float
+    /// This is the width of the view that holds the toggle.
+    private let toggleWidth: Float
     /// This is the threshold where the completion would start. Also this will make your slider disabled to prevent the slider works multiple times during the process.
     private let threshold: Float
     /// This is the duration for the animation to make the slider fully filled. The default value is 0.3 second.
@@ -29,7 +29,7 @@ public struct Unlocker<Content>: View where Content: View {
     /// - Parameters:
     ///   - disabled: This is a flag to `prevent the slider works multiple times` during the process.
     ///   - percentage: This is the percentage of the slider.
-    ///   - minPercentage: This is the minimum percentage. When you set this not zero, the slider would be filled the percentage that you set.
+    ///   - toggleWidth: This is the width of the view that holds the toggle.
     ///   - threshold: This is the threshold where the completion would start. Also this will make your slider disabled to prevent the slider works multiple times during the process.
     ///   - duration: /// This is the duration for the animation to make the slider fully filled. The default value is 0.3 second.
     ///   - content: This is the custom view inside of the slider.
@@ -37,7 +37,7 @@ public struct Unlocker<Content>: View where Content: View {
     public init(
         disabled: Binding<Bool>,
         percentage: Binding<Float>,
-        minPercentage: Float = 25.0,
+        toggleWidth: Float = 50,
         threshold: Float = 50.0,
         duration: Double = 0.3,
         resetOnCompletion: Bool = true,
@@ -46,11 +46,11 @@ public struct Unlocker<Content>: View where Content: View {
     ) {
         self._disabled = disabled
         self._percentage = percentage
-        self.minPercentage = minPercentage
         self.threshold = threshold
         self.duration = duration
         self.content = content
         self.completion = completion
+        self.toggleWidth = toggleWidth
         self.resetOnCompletion = resetOnCompletion
     }
     
@@ -60,11 +60,11 @@ public struct Unlocker<Content>: View where Content: View {
             // Slider
             ZStack(alignment: .leading) {
                 
-                let sliderWidth = abs(geo.size.width * CGFloat(percentage / 100))
-                
+                let swipeWidth = abs(geo.size.width * CGFloat(percentage / 100))
+
                 // Custom View
-                content(sliderWidth)
-                    .frame(width: sliderWidth)
+                content(swipeWidth)
+                    .frame(width: swipeWidth)
                 
             .gesture(
                 DragGesture(minimumDistance: 0)
@@ -78,16 +78,10 @@ public struct Unlocker<Content>: View where Content: View {
             
             } //: Z
             .contentShape(Path(CGRect(origin: .zero, size: geo.size)))
+
         } //: G
+        .padding(.leading, CGFloat(self.toggleWidth) / 2)
         .disabled(disabled)
-        .onAppear {
-            initPercentage()
-        }
-    }
-    
-    /// Init Percentage
-    private func initPercentage() {
-        percentage = minPercentage
     }
     
 }
@@ -105,20 +99,10 @@ extension Unlocker {
         
         // Dragged to the right
         if value.translation.width > 0 {
-            if percentage >= minPercentage {
-                DispatchQueue.main.async {
-                    withAnimation(.easeOut) {
-                        // change percentage value
-                        percentage = min(max(minPercentage, Float(value.location.x / geoProxy.size.width * 100)), 100)
-                    }
-                }
-            } else {
-                // Less than min
-                DispatchQueue.main.async {
-                    withAnimation(.easeOut) {
-                        // reset
-                        percentage = minPercentage
-                    }
+            DispatchQueue.main.async {
+                withAnimation(.easeOut) {
+                    // change percentage value
+                    percentage = min(max(0.0, Float(value.location.x / geoProxy.size.width * 100)), 100)
                 }
             }
         }
@@ -128,7 +112,7 @@ extension Unlocker {
             DispatchQueue.main.async {
                 withAnimation(.easeOut) {
                     // reset
-                    percentage = minPercentage
+                    percentage = 0.0
                 }
             }
         }
@@ -155,7 +139,7 @@ extension Unlocker {
             if resetOnCompletion {
                 DispatchQueue.main.asyncAfter(deadline: .now() + duration + 0.2) {
                     withAnimation(.easeOut(duration: duration)) {
-                        percentage = minPercentage
+                        percentage = 0.0
                     }
                 }
             }
@@ -165,7 +149,7 @@ extension Unlocker {
             // Reset slider
             DispatchQueue.main.async {
                 withAnimation(.easeOut) {
-                    percentage = minPercentage
+                    percentage = 0.0
                 }
             }
             
