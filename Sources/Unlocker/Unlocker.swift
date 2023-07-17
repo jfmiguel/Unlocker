@@ -77,7 +77,6 @@ public struct Unlocker<Content>: View where Content: View {
             )
             
             } //: Z
-            .contentShape(Path(CGRect(origin: .zero, size: geo.size)))
 
         } //: G
         .padding(.leading, CGFloat(self.toggleWidth) / 2)
